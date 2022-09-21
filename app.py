@@ -9,8 +9,9 @@ import shutil
 app = Flask(__name__)
 app.secret_key = uuid.uuid4().hex
 
-shutil.rmtree(Path("temp_folder"))
-Path("temp_folder").mkdir(exist_ok=True)
+if Path("temp_folder").exists():
+    shutil.rmtree(Path("temp_folder"))
+    Path("temp_folder").mkdir(exist_ok=True)
 
 
 @app.route("/", methods=["GET", "POST"])
