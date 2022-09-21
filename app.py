@@ -69,8 +69,8 @@ def index():
 
             shutil.rmtree(save_dir)
 
-            session["prog_stdout"] = prog_out.stdout
-            session["prog_stderr"] = prog_out.stderr
+            session["prog_stdout"] = prog_out.stdout if prog_out.stdout else ""
+            session["prog_stderr"] = prog_out.stderr if prog_out.stderr else ""
 
             return redirect(url_for("show_results"))
 
