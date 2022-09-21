@@ -81,13 +81,13 @@ def index():
 
 @app.route("/results", methods=["GET"])
 def show_results():
-    prog_stdout = session.get("prog_stdout")
-    prog_stderr = session.get("prog_stderr")
+    prog_stdout = session.get("prog_stdout", "")
+    prog_stderr = session.get("prog_stderr", "")
     return render_template("results.html", results=prog_stdout.replace("\n", "<br>").replace("\t", "    "),
                            errors=prog_stderr.replace("\n", "<br>").replace("\t", "    "))
 
 
 @app.route("/error", methods=["GET"])
 def show_errors():
-    errors = session.get("errors")
+    errors = session.get("errors", "")
     return render_template("error.html", errors=errors)
