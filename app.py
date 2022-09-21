@@ -11,7 +11,7 @@ app.secret_key = uuid.uuid4().hex
 
 if Path("temp_folder").exists():
     shutil.rmtree(Path("temp_folder"))
-    Path("temp_folder").mkdir(exist_ok=True)
+    Path("temp_folder").mkdir(exist_ok=True, parents=True)
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -22,7 +22,7 @@ def index():
     else:
         valid_assign_numbers = [1]
 
-        assignment_number = int(request.form.get("assign_number", ""))
+        assignment_number = int(request.form.get("assign_number")) if request.form.get("assign_number") else 0
         if assignment_number not in valid_assign_numbers:
             session["errors"] = f"Invalid assignment number."
             return redirect(url_for("show_errors"))
@@ -39,7 +39,7 @@ def index():
 
         unique_id = uuid.uuid4().hex
         save_dir = Path("temp_folder", f"{unique_id}")
-        save_dir.mkdir(exist_ok=True)
+        save_dir.mkdir(exist_ok=True, parents=True)
 
         try:
             uploaded_file.save(Path(save_dir, uploaded_file.filename))
@@ -55,12 +55,12 @@ def index():
             prog_out = subprocess.run(
                 [
                     "python",
-                    Path(r"D:\Library\Documents\PyCharm_Projects\CS372_Code_Grader\main.py").absolute(),
+                    Path("..", "CS372_Code_Grader", "main.py").absolute(),
                     str(assignment_number),
                     save_dir.absolute(),
                     "console"
                 ],
-                cwd=Path(r"D:\Library\Documents\PyCharm_Projects\CS372_Code_Grader").absolute(),
+                cwd=Path("..", "CS372_Code_Grader").absolute(),
                 capture_output=True,
                 text=True,
                 check=True,
@@ -75,7 +75,7 @@ def index():
             return redirect(url_for("show_results"))
 
         except Exception as e:
-            session["errors"] = e.stderr
+            session["errors"] = repr(e)
             return redirect(url_for("show_errors"))
 
 
