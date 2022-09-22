@@ -7,7 +7,8 @@ import re
 import shutil
 
 app = Flask(__name__)
-app.secret_key = uuid.uuid4().hex
+app.config["ENV"] = "production"
+app.config["SECRET_KEY"] = "c79157e0275feca1d9d36d05841e87e31dce375144b2f9726a9e598f3b25fd5a"
 
 if Path("temp_folder").exists():
     shutil.rmtree(Path("temp_folder"))
