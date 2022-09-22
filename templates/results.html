@@ -25,8 +25,13 @@
 
     {% autoescape false %}
     <div class="left">
-        <pre>{{ results }}</pre>
-        <pre>{{ errors }}</pre>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <pre>{{ message }}</pre>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
     </div>
     {% endautoescape %}
 </div>

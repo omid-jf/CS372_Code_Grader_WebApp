@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from pathlib import Path
 import subprocess
 from zipfile import ZipFile
@@ -20,21 +20,21 @@ def index():
         return render_template("index.html")
 
     else:
-        valid_assign_numbers = [1]
+        valid_assign_numbers = [1, 2]
 
         assignment_number = int(request.form.get("assign_number")) if request.form.get("assign_number") else 0
         if assignment_number not in valid_assign_numbers:
-            session["errors"] = f"Invalid assignment number."
+            flash("Invalid assignment number.")
             return redirect(url_for("show_errors"))
 
         uploaded_file = request.files.get("code_file")
 
         if not uploaded_file:
-            session["errors"] = f"No file uploaded."
+            flash("No file uploaded.")
             return redirect(url_for("show_errors"))
 
         if not bool(re.match(r"^[A-Z][a-z]+_800\d{6}.zip$", uploaded_file.filename)):
-            session["errors"] = f"Invalid zip file name. Should be Lastname_AggieID.zip"
+            flash("Invalid zip file name. Should be Lastname_AggieID.zip")
             return redirect(url_for("show_errors"))
 
         unique_id = uuid.uuid4().hex
@@ -47,7 +47,7 @@ def index():
             with ZipFile(Path(save_dir, uploaded_file.filename), "r") as zip_file:
 
                 if zip_file.namelist() not in [[f"assignment{assignment_number}.{ext}"] for ext in ["py", "cpp", "java"]]:
-                    session["errors"] = f"Zip file does not contain assignment{assignment_number}.py or .cpp or .java"
+                    flash(f"Zip file does not contain assignment{assignment_number}.py or .cpp or .java")
                     return redirect(url_for("show_errors"))
 
                 zip_file.extractall(Path(save_dir, Path(uploaded_file.filename).stem))
@@ -69,25 +69,24 @@ def index():
 
             shutil.rmtree(save_dir)
 
-            session["prog_stdout"] = prog_out.stdout if prog_out.stdout else ""
-            session["prog_stderr"] = prog_out.stderr if prog_out.stderr else ""
+            prog_stdout = prog_out.stdout.replace("\n", "<br>").replace("\t", "    ") if prog_out.stdout else ""
+            prog_stderr = prog_out.stderr.replace("\n", "<br>").replace("\t", "    ") if prog_out.stderr else ""
+
+            flash(prog_stdout, "prog_stdout")
+            flash(prog_stderr, "prog_stderr")
 
             return redirect(url_for("show_results"))
 
         except Exception as e:
-            session["errors"] = repr(e)
+            flash(repr(e))
             return redirect(url_for("show_errors"))
 
 
 @app.route("/results", methods=["GET"])
 def show_results():
-    prog_stdout = session.get("prog_stdout", "")
-    prog_stderr = session.get("prog_stderr", "")
-    return render_template("results.html", results=prog_stdout.replace("\n", "<br>").replace("\t", "    "),
-                           errors=prog_stderr.replace("\n", "<br>").replace("\t", "    "))
+    return render_template("results.html")
 
 
 @app.route("/error", methods=["GET"])
 def show_errors():
-    errors = session.get("errors", "")
-    return render_template("error.html", errors=errors)
+    return render_template("error.html")
