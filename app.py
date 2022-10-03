@@ -47,9 +47,14 @@ def index():
 
             with ZipFile(Path(save_dir, uploaded_file.filename), "r") as zip_file:
 
-                if zip_file.namelist() not in [[f"assignment{assignment_number}.{ext}"] for ext in ["py", "cpp", "java"]]:
-                    flash(f"Zip file does not contain assignment{assignment_number}.py or .cpp or .java")
-                    return redirect(url_for("show_errors"))
+                valid_zip_content = [f"assignment{assignment_number}.{ext}" for ext in ["py", "cpp", "java"]]
+
+                for zip_content in zip_file.namelist():
+                    if zip_content not in valid_zip_content and \
+                            not zip_content.startswith("__") and \
+                            not zip_content.startswith("."):
+                        flash(f"Zip file does not contain assignment{assignment_number}.py or .cpp or .java")
+                        return redirect(url_for("show_errors"))
 
                 zip_file.extractall(Path(save_dir, Path(uploaded_file.filename).stem))
 
