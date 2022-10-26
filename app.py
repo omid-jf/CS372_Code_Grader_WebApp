@@ -21,7 +21,7 @@ def index():
         return render_template("index.html")
 
     else:
-        valid_assign_numbers = [1, 2, 3, 4]
+        valid_assign_numbers = [1, 2, 3, 4, 5]
 
         assignment_number = int(request.form.get("assign_number")) if request.form.get("assign_number") else 0
         if assignment_number not in valid_assign_numbers:
